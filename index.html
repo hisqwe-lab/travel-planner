@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>우리의 세계 여행 일정표</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">WT</span>
+          <div>
+            <h1>우리의 세계 여행</h1>
+            <p>둘이 함께 고치는 일정표</p>
+          </div>
+        </div>
+
+        <section class="panel compact">
+          <div class="panel-title">
+            <h2>수정자</h2>
+          </div>
+          <div class="person-switch" role="group" aria-label="수정자 선택">
+            <button class="person active" data-person="me" type="button">
+              <span>나</span>
+            </button>
+            <button class="person" data-person="partner" type="button">
+              <span>배우자</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-title">
+            <h2>여행 정보</h2>
+          </div>
+          <label>
+            여행 이름
+            <input id="tripName" type="text" />
+          </label>
+          <div class="date-row">
+            <label>
+              출발
+              <input id="startDate" type="date" />
+            </label>
+            <label>
+              귀국
+              <input id="endDate" type="date" />
+            </label>
+          </div>
+          <label>
+            총 예산
+            <input id="budgetTotal" type="number" min="0" step="10000" />
+          </label>
+        </section>
+
+        <section class="panel compact">
+          <div class="panel-title">
+            <h2>공유</h2>
+          </div>
+          <div class="share-actions">
+            <button id="copyShare" class="ghost-btn" type="button">공유 링크</button>
+            <button id="exportJson" class="ghost-btn" type="button">백업 저장</button>
+            <label class="file-btn">
+              불러오기
+              <input id="importJson" type="file" accept="application/json" />
+            </label>
+          </div>
+          <div class="sync-box">
+            <label>
+              Firebase DB 주소
+              <input id="firebaseUrl" type="url" placeholder="https://프로젝트.firebaseio.com" />
+            </label>
+            <label>
+              여행 코드
+              <input id="tripCode" type="text" placeholder="예: honeymoon-2026" />
+            </label>
+            <label>
+              공개 앱 주소
+              <input id="publicAppUrl" type="url" placeholder="https://내앱주소.netlify.app" />
+            </label>
+            <div class="share-actions">
+              <button id="makeTripCode" class="ghost-btn" type="button">코드 생성</button>
+              <button id="connectSync" class="primary-btn" type="button">공동 편집 연결</button>
+            </div>
+          </div>
+          <p id="shareStatus" class="subtle"></p>
+        </section>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">World timetable planner</p>
+            <h2 id="tripTitle">여행 일정</h2>
+          </div>
+          <div class="stats">
+            <div>
+              <span id="tripDays">0</span>
+              <small>일</small>
+            </div>
+            <div>
+              <span id="cityCount">0</span>
+              <small>도시</small>
+            </div>
+            <div>
+              <span id="budgetLeft">0</span>
+              <small>남은 예산</small>
+            </div>
+          </div>
+        </header>
+
+        <section class="map-section">
+          <div class="map-toolbar">
+            <div>
+              <h3>세계 지도</h3>
+              <p>일정에 등록한 도시가 지도에 표시됩니다.</p>
+            </div>
+            <div class="map-tools">
+              <input id="googleMapsKey" type="password" placeholder="Google Maps API 키" aria-label="Google Maps API 키" />
+              <button id="saveGoogleKey" class="ghost-btn" type="button">키 저장</button>
+              <button id="fitRoute" class="icon-btn" type="button" title="전체 경로 보기">⌖</button>
+            </div>
+          </div>
+          <div class="world-map" id="mapWrap" aria-label="여행 경로 세계지도">
+            <div class="map-stage">
+              <div id="travelMap" class="google-map" role="application" aria-label="Google Maps 여행 지도"></div>
+            </div>
+            <div id="mapLinks" class="map-links"></div>
+          </div>
+        </section>
+
+        <div class="content-grid">
+          <section class="workspace">
+            <div class="tabs" role="tablist" aria-label="여행 관리 메뉴">
+              <button class="tab active" data-tab="timeline" type="button">타임테이블</button>
+              <button class="tab" data-tab="expenses" type="button">비용</button>
+              <button class="tab" data-tab="bookings" type="button">예약</button>
+              <button class="tab" data-tab="history" type="button">수정 기록</button>
+            </div>
+
+            <section class="tab-panel active" id="timelinePanel">
+              <form id="scheduleForm" class="editor-form">
+                <input name="id" type="hidden" />
+                <label>
+                  날짜
+                  <input name="date" type="date" required />
+                </label>
+                <label>
+                  시간
+                  <input name="time" type="time" required />
+                </label>
+                <label>
+                  도시
+                  <input name="city" type="text" placeholder="예: Tokyo" required />
+                </label>
+                <label>
+                  장소 / 일정
+                  <input name="title" type="text" placeholder="예: 시부야 산책" required />
+                </label>
+                <label>
+                  위도
+                  <input name="lat" type="number" step="0.0001" placeholder="35.6762" />
+                </label>
+                <label>
+                  경도
+                  <input name="lon" type="number" step="0.0001" placeholder="139.6503" />
+                </label>
+                <label class="wide">
+                  메모
+                  <textarea name="note" rows="2" placeholder="준비물, 주소, 티켓 링크 등을 적어두세요."></textarea>
+                </label>
+                <div class="form-actions">
+                  <button type="button" id="clearSchedule" class="ghost-btn">비우기</button>
+                  <button type="submit" class="primary-btn">일정 저장</button>
+                </div>
+              </form>
+              <div class="list-head">
+                <h3>전체 일정</h3>
+                <select id="dayFilter" aria-label="날짜 필터"></select>
+              </div>
+              <div id="scheduleList" class="timeline-list"></div>
+            </section>
+
+            <section class="tab-panel" id="expensesPanel">
+              <form id="expenseForm" class="editor-form money-form">
+                <input name="id" type="hidden" />
+                <label>
+                  구분
+                  <select name="category">
+                    <option>항공권</option>
+                    <option>숙박</option>
+                    <option>식비</option>
+                    <option>답례품</option>
+                    <option>교통비</option>
+                    <option>기타 예약비</option>
+                  </select>
+                </label>
+                <label>
+                  항목
+                  <input name="title" type="text" placeholder="예: 인천-파리 왕복" required />
+                </label>
+                <label>
+                  금액
+                  <input name="amount" type="number" min="0" step="1000" required />
+                </label>
+                <label>
+                  결제자
+                  <select name="payer">
+                    <option value="me">나</option>
+                    <option value="partner">배우자</option>
+                    <option value="shared">공동</option>
+                  </select>
+                </label>
+                <label class="wide">
+                  메모
+                  <textarea name="note" rows="2"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button type="button" id="clearExpense" class="ghost-btn">비우기</button>
+                  <button type="submit" class="primary-btn">비용 저장</button>
+                </div>
+              </form>
+              <div id="expenseSummary" class="expense-summary"></div>
+              <div id="expenseList" class="expense-list"></div>
+            </section>
+
+            <section class="tab-panel" id="bookingsPanel">
+              <form id="bookingForm" class="editor-form">
+                <input name="id" type="hidden" />
+                <label>
+                  종류
+                  <select name="type">
+                    <option>항공</option>
+                    <option>숙박</option>
+                    <option>식당</option>
+                    <option>교통</option>
+                    <option>투어</option>
+                    <option>기타</option>
+                  </select>
+                </label>
+                <label>
+                  예약명
+                  <input name="title" type="text" required />
+                </label>
+                <label>
+                  날짜
+                  <input name="date" type="date" />
+                </label>
+                <label>
+                  예약 번호
+                  <input name="code" type="text" />
+                </label>
+                <label class="wide">
+                  링크 / 메모
+                  <textarea name="note" rows="2"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button type="button" id="clearBooking" class="ghost-btn">비우기</button>
+                  <button type="submit" class="primary-btn">예약 저장</button>
+                </div>
+              </form>
+              <div id="bookingList" class="booking-list"></div>
+            </section>
+
+            <section class="tab-panel" id="historyPanel">
+              <div id="historyList" class="history-list"></div>
+            </section>
+          </section>
+
+          <aside class="right-rail">
+            <section class="panel">
+              <div class="panel-title">
+                <h2>오늘 체크</h2>
+              </div>
+              <div id="todayList" class="mini-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-title">
+                <h2>카테고리별 비용</h2>
+              </div>
+              <div id="categoryBars" class="category-bars"></div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <template id="emptyState">
+      <div class="empty">
+        <strong>아직 등록된 항목이 없습니다.</strong>
+        <span>위 입력칸에서 첫 항목을 추가해보세요.</span>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
