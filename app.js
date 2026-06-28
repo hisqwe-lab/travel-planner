@@ -19,6 +19,7 @@ const syncState = {
   firebaseUrl: localStorage.getItem(FIREBASE_URL_STORAGE) || "",
   tripCode: localStorage.getItem(TRIP_CODE_STORAGE) || "",
   timer: null,
+  stream: null,
   saving: false,
   lastRemoteUpdatedAt: "",
   lastSerialized: "",
@@ -287,6 +288,24 @@ async function pushRemoteState() {
   }
 }
 
+function applyRemoteState(remote, message = "공동 편집 내용 동기화 완료") {
+  if (!remote || typeof remote !== "object") return false;
+  const remoteSerialized = JSON.stringify(remote);
+  const remoteUpdatedAt = remote?.meta?.remoteUpdatedAt || "";
+  const localUpdatedAt = state.meta.remoteUpdatedAt || "";
+
+  if (remoteSerialized === syncState.lastSerialized || remoteUpdatedAt < localUpdatedAt) {
+    return false;
+  }
+
+  state = remote;
+  syncState.lastSerialized = remoteSerialized;
+  localStorage.setItem(STORAGE_KEY, remoteSerialized);
+  render();
+  $("#shareStatus").textContent = message;
+  return true;
+}
+
 async function pullRemoteState() {
   if (!isSyncReady()) return;
   try {
@@ -299,27 +318,58 @@ async function pullRemoteState() {
       return;
     }
 
-    const remoteSerialized = JSON.stringify(remote);
-    const remoteUpdatedAt = remote?.meta?.remoteUpdatedAt || "";
-    if (remoteSerialized !== syncState.lastSerialized && remoteUpdatedAt >= (state.meta.remoteUpdatedAt || "")) {
-      state = remote;
-      syncState.lastSerialized = remoteSerialized;
-      localStorage.setItem(STORAGE_KEY, remoteSerialized);
-      render();
-      $("#shareStatus").textContent = "공동 편집 내용 동기화 완료";
-    }
+    applyRemoteState(remote);
   } catch {
     $("#shareStatus").textContent = "공동 편집 연결을 확인해주세요.";
   }
 }
 
+function stopRemoteStream() {
+  if (!syncState.stream) return;
+  syncState.stream.close();
+  syncState.stream = null;
+}
+
+function startRemoteStream() {
+  if (!window.EventSource || !isSyncReady()) return false;
+  stopRemoteStream();
+
+  const stream = new EventSource(getRemoteUrl());
+  syncState.stream = stream;
+
+  stream.addEventListener("put", (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload?.path === "/" && payload.data) {
+        applyRemoteState(payload.data, "공동 편집 내용이 바로 반영되었습니다.");
+      } else {
+        pullRemoteState();
+      }
+    } catch {
+      pullRemoteState();
+    }
+  });
+
+  stream.addEventListener("patch", () => pullRemoteState());
+  stream.onerror = () => {
+    stopRemoteStream();
+  };
+
+  return true;
+}
+
 function startSync() {
   if (syncState.timer) window.clearInterval(syncState.timer);
+  stopRemoteStream();
   if (!isSyncReady()) return;
   localStorage.setItem(FIREBASE_URL_STORAGE, syncState.firebaseUrl);
   localStorage.setItem(TRIP_CODE_STORAGE, syncState.tripCode);
   pullRemoteState();
-  syncState.timer = window.setInterval(pullRemoteState, 3500);
+  const hasLiveStream = startRemoteStream();
+  syncState.timer = window.setInterval(() => {
+    if (!syncState.stream) startRemoteStream();
+    pullRemoteState();
+  }, hasLiveStream ? 10000 : 2500);
 }
 
 function createTripCode() {
