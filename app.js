@@ -347,6 +347,19 @@ function upsert(collection, data) {
   }
 }
 
+async function updateScheduleLocationAfterSave(data) {
+  if (!data.placeQuery || (data.lat !== "" && data.lon !== "")) return;
+  const enriched = await enrichScheduleLocation({ ...data });
+  if (enriched.lat === "" || enriched.lon === "") return;
+
+  upsert("schedules", enriched);
+  state.meta.remoteUpdatedAt = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  syncState.lastSerialized = JSON.stringify(state);
+  render();
+  pushRemoteState();
+}
+
 function removeItem(collection, id, label) {
   state[collection] = state[collection].filter((item) => item.id !== id);
   save(`${label} 삭제`);
@@ -802,10 +815,12 @@ function bindEvents() {
 
   $("#scheduleForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    const data = await enrichScheduleLocation(formToObject(event.currentTarget));
+    const data = formToObject(event.currentTarget);
+    if (!data.id) data.id = crypto.randomUUID();
     upsert("schedules", data);
     resetForm(event.currentTarget);
     save("일정 저장");
+    updateScheduleLocationAfterSave(data);
   });
   $("#expenseForm").addEventListener("submit", (event) => {
     event.preventDefault();
