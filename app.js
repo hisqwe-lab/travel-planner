@@ -543,10 +543,7 @@ function renderSidePanels() {
 }
 
 function renderMap() {
-  const points = state.schedules
-    .filter((item) => item.lat !== "" && item.lon !== "" && !Number.isNaN(Number(item.lat)) && !Number.isNaN(Number(item.lon)))
-    .sort(byDateTime)
-    .map((item) => ({ ...item, lat: Number(item.lat), lon: Number(item.lon) }));
+  const points = getScheduleMapPoints();
 
   $("#googleMapsKey").value = BUILT_IN_GOOGLE_MAPS_KEY ? "" : googleMapState.key;
   $("#googleMapsKey").placeholder = BUILT_IN_GOOGLE_MAPS_KEY ? "배포 키 사용 중" : "Google Maps API 키";
@@ -559,10 +556,11 @@ function renderMap() {
     return;
   }
 
+  const filter = getSelectedMapDate();
   if (!points.length) {
-    links.innerHTML = `<span class="map-link">일정의 장소를 저장하면 구글 지도 경로가 표시됩니다.</span>`;
+    links.innerHTML = `<span class="map-link">${filter === "all" ? "일정의 장소를 저장하면 구글 지도 경로가 표시됩니다." : "선택한 날짜에 지도 장소가 있는 일정이 없습니다."}</span>`;
   } else {
-    links.innerHTML = `<button id="openGoogleRoute" class="map-link map-link-button" type="button">Google Maps에서 일정 경로 열기</button>`;
+    links.innerHTML = `<button id="openGoogleRoute" class="map-link map-link-button" type="button">${filter === "all" ? "Google Maps에서 전체 경로 열기" : "Google Maps에서 선택 날짜 경로 열기"}</button>`;
   }
 
   loadGoogleMaps()
@@ -575,8 +573,15 @@ function renderMap() {
     });
 }
 
+function getSelectedMapDate() {
+  const filter = $("#dayFilter")?.value || "all";
+  return filter;
+}
+
 function getScheduleMapPoints() {
+  const filter = getSelectedMapDate();
   return state.schedules
+    .filter((item) => filter === "all" || item.date === filter)
     .filter((item) => item.lat !== "" && item.lon !== "" && !Number.isNaN(Number(item.lat)) && !Number.isNaN(Number(item.lon)))
     .sort(byDateTime)
     .map((item) => ({ ...item, lat: Number(item.lat), lon: Number(item.lon) }));
@@ -781,7 +786,10 @@ function bindEvents() {
     });
   });
 
-  $("#dayFilter").addEventListener("change", renderSchedules);
+  $("#dayFilter").addEventListener("change", () => {
+    renderSchedules();
+    renderMap();
+  });
 
   $("#scheduleForm input[name='placeQuery']").addEventListener("focus", () => {
     if (!googleMapState.key) return;
