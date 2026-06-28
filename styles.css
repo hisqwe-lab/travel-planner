@@ -163,6 +163,10 @@ main {
   gap: 12px;
 }
 
+.person-panel {
+  display: none;
+}
+
 .panel-title {
   display: flex;
   align-items: center;
@@ -599,8 +603,12 @@ textarea:focus {
 }
 
 @media (max-width: 760px) {
+  :root {
+    --shadow: 0 10px 28px rgba(31, 45, 58, 0.08);
+  }
+
   body {
-    background: #f7fafb;
+    background: linear-gradient(180deg, #edf5f4 0, #f7fafb 220px, #f7fafb 100%);
   }
 
   .app-shell {
@@ -631,6 +639,7 @@ textarea:focus {
   .topbar {
     gap: 12px;
     margin-bottom: 12px;
+    padding: 4px 2px 0;
   }
 
   .eyebrow {
@@ -640,6 +649,7 @@ textarea:focus {
   .topbar h2 {
     font-size: 28px;
     line-height: 1.15;
+    letter-spacing: 0;
   }
 
   .stats {
@@ -648,8 +658,11 @@ textarea:focus {
   }
 
   .stats div {
-    min-height: 58px;
-    padding: 10px 8px;
+    min-height: 54px;
+    padding: 9px 8px;
+    border-color: rgba(47, 159, 143, 0.18);
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(10px);
   }
 
   .stats span {
@@ -661,12 +674,13 @@ textarea:focus {
   .workspace,
   .panel {
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(31, 45, 58, 0.08);
+    border-color: rgba(217, 224, 231, 0.9);
+    box-shadow: var(--shadow);
   }
 
   .map-toolbar {
     gap: 12px;
-    padding: 14px 14px 0;
+    padding: 12px 12px 0;
   }
 
   .map-tools {
@@ -681,7 +695,7 @@ textarea:focus {
   }
 
   .world-map {
-    padding: 10px 10px 12px;
+    padding: 8px 8px 10px;
   }
 
   .map-stage {
@@ -696,8 +710,11 @@ textarea:focus {
     z-index: 10;
     display: flex;
     overflow-x: auto;
+    gap: 6px;
+    padding: 8px;
     border-bottom: 1px solid var(--line);
-    background: #fff;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
     scrollbar-width: none;
   }
 
@@ -707,9 +724,19 @@ textarea:focus {
 
   .tab {
     flex: 0 0 auto;
-    min-width: 104px;
-    min-height: 50px;
-    padding: 0 14px;
+    min-width: 96px;
+    min-height: 42px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: #eef4f3;
+    color: #50606a;
+    box-shadow: none;
+  }
+
+  .tab.active {
+    background: #17242b;
+    color: #fff;
+    box-shadow: none;
   }
 
   .expense-summary {
@@ -717,7 +744,7 @@ textarea:focus {
   }
 
   .tab-panel {
-    padding: 12px;
+    padding: 10px;
   }
 
   .summary-card {
@@ -731,8 +758,8 @@ textarea:focus {
   .editor-form {
     grid-template-columns: 1fr;
     gap: 10px;
-    padding-bottom: 14px;
-    margin-bottom: 14px;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
   }
 
   .date-row {
@@ -776,6 +803,7 @@ textarea:focus {
 
   .item {
     padding: 10px;
+    border-color: rgba(217, 224, 231, 0.92);
   }
 
   .item h4 {
@@ -807,8 +835,14 @@ textarea:focus {
     display: none;
   }
 
+  .sidebar .person-panel,
+  .sidebar .share-panel {
+    display: none;
+  }
+
   .sidebar .panel {
     padding: 12px;
+    background: #17242b;
   }
 
   .sidebar .panel.compact {

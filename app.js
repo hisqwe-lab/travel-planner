@@ -4,7 +4,7 @@ const FIREBASE_URL_STORAGE = "couple-world-trip-firebase-url";
 const TRIP_CODE_STORAGE = "couple-world-trip-code";
 const PUBLIC_APP_URL_STORAGE = "couple-world-trip-public-app-url";
 const BUILT_IN_GOOGLE_MAPS_KEY = window.TRAVEL_PLANNER_GOOGLE_MAPS_KEY || "";
-const people = { me: "나", partner: "배우자", shared: "공동" };
+const people = { me: "공동", partner: "공동", shared: "공동" };
 const money = new Intl.NumberFormat("ko-KR");
 const googleMapState = {
   map: null,
@@ -168,7 +168,7 @@ function won(value) {
 }
 
 function currentPersonLabel(id = state.meta.activePerson) {
-  return people[id] || "나";
+  return people[id] || "공동";
 }
 
 function touch(item) {
