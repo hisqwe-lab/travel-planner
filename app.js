@@ -12,7 +12,8 @@ const googleMapState = {
   route: null,
   key: BUILT_IN_GOOGLE_MAPS_KEY || localStorage.getItem(GOOGLE_KEY_STORAGE) || "",
   loadPromise: null,
-  geocoder: null
+  geocoder: null,
+  autocomplete: null
 };
 const syncState = {
   firebaseUrl: localStorage.getItem(FIREBASE_URL_STORAGE) || "",
@@ -218,6 +219,33 @@ async function geocodePlace(query) {
   });
 }
 
+function initPlaceAutocomplete() {
+  if (!window.google?.maps?.places || googleMapState.autocomplete) return;
+  const input = document.querySelector("#scheduleForm input[name='placeQuery']");
+  if (!input) return;
+
+  googleMapState.autocomplete = new google.maps.places.Autocomplete(input, {
+    fields: ["place_id", "formatted_address", "geometry", "name"],
+    types: ["establishment", "geocode"]
+  });
+
+  googleMapState.autocomplete.addListener("place_changed", () => {
+    const place = googleMapState.autocomplete.getPlace();
+    if (!place?.geometry?.location) {
+      $("#shareStatus").textContent = "선택한 장소의 위치 정보를 찾지 못했습니다.";
+      return;
+    }
+
+    const form = $("#scheduleForm");
+    form.elements.placeQuery.value = place.name || form.elements.placeQuery.value;
+    form.elements.placeId.value = place.place_id || "";
+    form.elements.placeAddress.value = place.formatted_address || "";
+    form.elements.lat.value = place.geometry.location.lat();
+    form.elements.lon.value = place.geometry.location.lng();
+    $("#shareStatus").textContent = "장소를 선택했습니다. 일정 저장을 누르면 지도에 반영됩니다.";
+  });
+}
+
 function fillForm(form, item) {
   Object.entries(item).forEach(([key, value]) => {
     const field = form.elements[key];
@@ -377,6 +405,7 @@ function renderSchedules() {
           <h4>${escapeHtml(item.title)}</h4>
           <p>${formatDate(item.date)} ${item.time || ""} · ${escapeHtml(item.city)}</p>
           ${item.placeQuery ? `<p>${escapeHtml(item.placeQuery)}</p>` : ""}
+          ${item.placeAddress ? `<p>${escapeHtml(item.placeAddress)}</p>` : ""}
           ${item.note ? `<p>${escapeHtml(item.note)}</p>` : ""}
         </div>
         <div class="item-actions">
@@ -535,7 +564,10 @@ function renderMap() {
   }
 
   loadGoogleMaps()
-    .then(() => drawGoogleMap(points))
+    .then(() => {
+      initPlaceAutocomplete();
+      drawGoogleMap(points);
+    })
     .catch(() => {
       $("#travelMap").innerHTML = "Google Maps를 불러오지 못했습니다. API 키와 결제/도메인 제한 설정을 확인해주세요.";
     });
@@ -553,7 +585,7 @@ function loadGoogleMaps() {
     };
 
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(googleMapState.key)}&callback=${callbackName}&v=weekly`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(googleMapState.key)}&callback=${callbackName}&libraries=places&v=weekly`;
     script.async = true;
     script.defer = true;
     script.onerror = () => {
@@ -710,6 +742,15 @@ function bindEvents() {
   });
 
   $("#dayFilter").addEventListener("change", renderSchedules);
+
+  $("#scheduleForm input[name='placeQuery']").addEventListener("focus", () => {
+    if (!googleMapState.key) return;
+    loadGoogleMaps()
+      .then(initPlaceAutocomplete)
+      .catch(() => {
+        $("#shareStatus").textContent = "장소 자동완성을 불러오지 못했습니다.";
+      });
+  });
 
   $("#scheduleForm").addEventListener("submit", async (event) => {
     event.preventDefault();

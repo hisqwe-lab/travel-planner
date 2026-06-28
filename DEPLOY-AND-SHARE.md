@@ -3,6 +3,7 @@
 ## 1. Google Maps
 
 앱 상단의 `Google Maps API 키` 칸에는 Maps JavaScript API가 활성화된 키를 넣습니다.
+장소 자동완성을 쓰려면 같은 프로젝트에서 Places API도 활성화하세요.
 
 배포된 앱에서 모든 사용자가 키를 따로 입력하지 않게 하려면 `config.js` 파일의 값을 바꿉니다.
 
