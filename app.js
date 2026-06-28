@@ -3,13 +3,14 @@ const GOOGLE_KEY_STORAGE = "couple-world-trip-google-maps-key";
 const FIREBASE_URL_STORAGE = "couple-world-trip-firebase-url";
 const TRIP_CODE_STORAGE = "couple-world-trip-code";
 const PUBLIC_APP_URL_STORAGE = "couple-world-trip-public-app-url";
+const BUILT_IN_GOOGLE_MAPS_KEY = window.TRAVEL_PLANNER_GOOGLE_MAPS_KEY || "";
 const people = { me: "나", partner: "배우자", shared: "공동" };
 const money = new Intl.NumberFormat("ko-KR");
 const googleMapState = {
   map: null,
   markers: [],
   route: null,
-  key: localStorage.getItem(GOOGLE_KEY_STORAGE) || "",
+  key: BUILT_IN_GOOGLE_MAPS_KEY || localStorage.getItem(GOOGLE_KEY_STORAGE) || "",
   loadPromise: null
 };
 const syncState = {
@@ -474,7 +475,8 @@ function renderMap() {
     .sort(byDateTime)
     .map((item) => ({ ...item, lat: Number(item.lat), lon: Number(item.lon) }));
 
-  $("#googleMapsKey").value = googleMapState.key;
+  $("#googleMapsKey").value = BUILT_IN_GOOGLE_MAPS_KEY ? "" : googleMapState.key;
+  $("#googleMapsKey").placeholder = BUILT_IN_GOOGLE_MAPS_KEY ? "배포 키 사용 중" : "Google Maps API 키";
   const links = $("#mapLinks");
   links.innerHTML = "";
 

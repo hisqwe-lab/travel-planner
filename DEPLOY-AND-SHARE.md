@@ -4,6 +4,12 @@
 
 앱 상단의 `Google Maps API 키` 칸에는 Maps JavaScript API가 활성화된 키를 넣습니다.
 
+배포된 앱에서 모든 사용자가 키를 따로 입력하지 않게 하려면 `config.js` 파일의 값을 바꿉니다.
+
+```js
+window.TRAVEL_PLANNER_GOOGLE_MAPS_KEY = "여기에_Google_Maps_API_키";
+```
+
 API 키를 제한할 때 앱을 배포한 주소를 리퍼러로 추가하세요.
 
 예:
