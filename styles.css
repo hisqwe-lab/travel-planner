@@ -414,6 +414,27 @@ textarea:focus {
   grid-column: 1 / -1;
 }
 
+.advanced-coords {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fafb;
+  padding: 10px 12px;
+}
+
+.advanced-coords summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.coord-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
 .form-actions {
   grid-column: 1 / -1;
   justify-content: flex-end;

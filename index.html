@@ -159,14 +159,23 @@
                   장소 / 일정
                   <input name="title" type="text" placeholder="예: 시부야 산책" required />
                 </label>
-                <label>
-                  위도
-                  <input name="lat" type="number" step="0.0001" placeholder="35.6762" />
+                <label class="wide">
+                  지도 장소 검색
+                  <input name="placeQuery" type="text" placeholder="예: 시부야 스카이, 도쿄 / Eiffel Tower, Paris" />
                 </label>
-                <label>
-                  경도
-                  <input name="lon" type="number" step="0.0001" placeholder="139.6503" />
-                </label>
+                <details class="advanced-coords wide">
+                  <summary>좌표 직접 입력</summary>
+                  <div class="coord-grid">
+                    <label>
+                      위도
+                      <input name="lat" type="number" step="0.0001" placeholder="35.6762" />
+                    </label>
+                    <label>
+                      경도
+                      <input name="lon" type="number" step="0.0001" placeholder="139.6503" />
+                    </label>
+                  </div>
+                </details>
                 <label class="wide">
                   메모
                   <textarea name="note" rows="2" placeholder="준비물, 주소, 티켓 링크 등을 적어두세요."></textarea>

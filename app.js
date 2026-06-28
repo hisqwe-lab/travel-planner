@@ -11,7 +11,8 @@ const googleMapState = {
   markers: [],
   route: null,
   key: BUILT_IN_GOOGLE_MAPS_KEY || localStorage.getItem(GOOGLE_KEY_STORAGE) || "",
-  loadPromise: null
+  loadPromise: null,
+  geocoder: null
 };
 const syncState = {
   firebaseUrl: localStorage.getItem(FIREBASE_URL_STORAGE) || "",
@@ -175,6 +176,44 @@ function formToObject(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
+async function enrichScheduleLocation(data) {
+  const existing = data.id ? state.schedules.find((item) => item.id === data.id) : null;
+  const hasManualCoords = data.lat !== "" && data.lon !== "";
+  const placeChanged = data.placeQuery && data.placeQuery !== existing?.placeQuery;
+
+  if (!data.placeQuery || (hasManualCoords && !placeChanged)) return data;
+  if (!googleMapState.key) {
+    $("#shareStatus").textContent = "Google Maps API 키가 없어 장소 좌표를 찾지 못했습니다.";
+    return data;
+  }
+
+  try {
+    const result = await geocodePlace(`${data.placeQuery}, ${data.city}`.trim());
+    data.lat = result.lat;
+    data.lon = result.lon;
+    $("#shareStatus").textContent = "장소 위치를 찾아 일정에 저장했습니다.";
+  } catch {
+    $("#shareStatus").textContent = "장소 위치를 찾지 못했습니다. 장소명을 더 자세히 적거나 좌표를 직접 입력해주세요.";
+  }
+  return data;
+}
+
+async function geocodePlace(query) {
+  await loadGoogleMaps();
+  if (!googleMapState.geocoder) googleMapState.geocoder = new google.maps.Geocoder();
+
+  return new Promise((resolve, reject) => {
+    googleMapState.geocoder.geocode({ address: query }, (results, status) => {
+      if (status !== "OK" || !results?.[0]) {
+        reject(new Error(status));
+        return;
+      }
+      const location = results[0].geometry.location;
+      resolve({ lat: location.lat(), lon: location.lng() });
+    });
+  });
+}
+
 function fillForm(form, item) {
   Object.entries(item).forEach(([key, value]) => {
     const field = form.elements[key];
@@ -333,6 +372,7 @@ function renderSchedules() {
         <div>
           <h4>${escapeHtml(item.title)}</h4>
           <p>${formatDate(item.date)} ${item.time || ""} · ${escapeHtml(item.city)}</p>
+          ${item.placeQuery ? `<p>${escapeHtml(item.placeQuery)}</p>` : ""}
           ${item.note ? `<p>${escapeHtml(item.note)}</p>` : ""}
         </div>
         <div class="item-actions">
@@ -342,7 +382,7 @@ function renderSchedules() {
       </div>
       <div class="meta">
         <span class="chip">${currentPersonLabel(item.updatedBy)} 수정</span>
-        ${item.lat && item.lon ? `<span class="chip">${Number(item.lat).toFixed(2)}, ${Number(item.lon).toFixed(2)}</span>` : ""}
+        ${item.lat && item.lon ? `<span class="chip">지도 위치 있음</span>` : ""}
       </div>
     `;
     list.append(node);
@@ -667,9 +707,10 @@ function bindEvents() {
 
   $("#dayFilter").addEventListener("change", renderSchedules);
 
-  $("#scheduleForm").addEventListener("submit", (event) => {
+  $("#scheduleForm").addEventListener("submit", async (event) => {
     event.preventDefault();
-    upsert("schedules", formToObject(event.currentTarget));
+    const data = await enrichScheduleLocation(formToObject(event.currentTarget));
+    upsert("schedules", data);
     resetForm(event.currentTarget);
     save("일정 저장");
   });
