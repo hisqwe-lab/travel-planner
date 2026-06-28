@@ -100,6 +100,7 @@ if (state.meta?.tripName === "2026 세계 여행") {
   state.meta.tripName = "이탈리아 신혼여행";
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
+let preferredDayFilter = "";
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -391,10 +392,11 @@ function renderMeta() {
 
 function renderDayFilter() {
   const select = $("#dayFilter");
-  const current = select.value || "all";
+  const current = preferredDayFilter || select.value || "all";
   const dates = [...new Set(state.schedules.map((item) => item.date).filter(Boolean))].sort();
   select.innerHTML = `<option value="all">전체 날짜</option>${dates.map((date) => `<option value="${date}">${formatDate(date)}</option>`).join("")}`;
   select.value = dates.includes(current) ? current : "all";
+  preferredDayFilter = "";
 }
 
 function renderSchedules() {
@@ -817,9 +819,11 @@ function bindEvents() {
     event.preventDefault();
     const data = formToObject(event.currentTarget);
     if (!data.id) data.id = crypto.randomUUID();
+    preferredDayFilter = data.date || "all";
     upsert("schedules", data);
     resetForm(event.currentTarget);
     save("일정 저장");
+    $("#shareStatus").textContent = "일정을 저장했습니다.";
     updateScheduleLocationAfterSave(data);
   });
   $("#expenseForm").addEventListener("submit", (event) => {
