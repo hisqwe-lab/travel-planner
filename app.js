@@ -560,7 +560,9 @@ function renderMap() {
   }
 
   if (!points.length) {
-    links.innerHTML = `<span class="map-link">일정에 위도와 경도를 입력하면 구글 지도에 경로가 표시됩니다.</span>`;
+    links.innerHTML = `<span class="map-link">일정의 장소를 저장하면 구글 지도 경로가 표시됩니다.</span>`;
+  } else {
+    links.innerHTML = `<button id="openGoogleRoute" class="map-link map-link-button" type="button">Google Maps에서 일정 경로 열기</button>`;
   }
 
   loadGoogleMaps()
@@ -571,6 +573,43 @@ function renderMap() {
     .catch(() => {
       $("#travelMap").innerHTML = "Google Maps를 불러오지 못했습니다. API 키와 결제/도메인 제한 설정을 확인해주세요.";
     });
+}
+
+function getScheduleMapPoints() {
+  return state.schedules
+    .filter((item) => item.lat !== "" && item.lon !== "" && !Number.isNaN(Number(item.lat)) && !Number.isNaN(Number(item.lon)))
+    .sort(byDateTime)
+    .map((item) => ({ ...item, lat: Number(item.lat), lon: Number(item.lon) }));
+}
+
+function buildGoogleMapsRouteUrl(points = getScheduleMapPoints()) {
+  if (!points.length) return "https://www.google.com/maps";
+  if (points.length === 1) {
+    const point = points[0];
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${point.lat},${point.lon}`)}&query_place_id=${encodeURIComponent(point.placeId || "")}`;
+  }
+
+  const origin = points[0];
+  const destination = points[points.length - 1];
+  const waypointPoints = points.slice(1, -1).slice(0, 23);
+  const url = new URL("https://www.google.com/maps/dir/");
+  url.searchParams.set("api", "1");
+  url.searchParams.set("origin", `${origin.lat},${origin.lon}`);
+  url.searchParams.set("destination", `${destination.lat},${destination.lon}`);
+  if (waypointPoints.length) {
+    url.searchParams.set("waypoints", waypointPoints.map((point) => `${point.lat},${point.lon}`).join("|"));
+  }
+  url.searchParams.set("travelmode", "driving");
+  return url.toString();
+}
+
+function openGoogleMapsRoute() {
+  const points = getScheduleMapPoints();
+  if (!points.length) {
+    $("#shareStatus").textContent = "먼저 일정에 지도 장소를 저장해주세요.";
+    return;
+  }
+  window.open(buildGoogleMapsRouteUrl(points), "_blank", "noopener,noreferrer");
 }
 
 function loadGoogleMaps() {
@@ -610,6 +649,7 @@ function drawGoogleMap(points) {
       streetViewControl: false,
       fullscreenControl: true
     });
+    googleMapState.map.addListener("click", openGoogleMapsRoute);
   }
 
   googleMapState.markers.forEach((marker) => marker.setMap(null));
@@ -780,6 +820,11 @@ function bindEvents() {
     const target = event.target.closest("button");
     if (!target) return;
 
+    if (target.id === "openGoogleRoute") {
+      openGoogleMapsRoute();
+      return;
+    }
+
     const editSchedule = target.dataset.editSchedule;
     const deleteSchedule = target.dataset.deleteSchedule;
     const editExpense = target.dataset.editExpense;
@@ -842,6 +887,10 @@ function bindEvents() {
 
   $("#fitRoute").addEventListener("click", () => {
     fitMapToRoute(true);
+  });
+
+  $("#travelMap").addEventListener("dblclick", () => {
+    openGoogleMapsRoute();
   });
 }
 

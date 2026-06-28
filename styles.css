@@ -323,6 +323,10 @@ textarea:focus {
   width: min(260px, 42vw);
 }
 
+.api-key-control {
+  display: none;
+}
+
 .world-map {
   padding: 10px 14px 16px;
 }
@@ -343,6 +347,7 @@ textarea:focus {
   color: var(--muted);
   font-weight: 800;
   text-align: center;
+  cursor: pointer;
 }
 
 .google-map > div {
@@ -365,6 +370,10 @@ textarea:focus {
   font-size: 12px;
   font-weight: 800;
   text-decoration: none;
+}
+
+.map-link-button {
+  cursor: pointer;
 }
 
 .content-grid {
