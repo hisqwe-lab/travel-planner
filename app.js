@@ -26,7 +26,7 @@ const syncState = {
 
 const sampleData = {
   meta: {
-    tripName: "2026 세계 여행",
+    tripName: "이탈리아 신혼여행",
     startDate: "2026-09-05",
     endDate: "2026-09-18",
     budgetTotal: 8500000,
@@ -95,6 +95,10 @@ const sampleData = {
 };
 
 let state = loadState();
+if (state.meta?.tripName === "2026 세계 여행") {
+  state.meta.tripName = "이탈리아 신혼여행";
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));

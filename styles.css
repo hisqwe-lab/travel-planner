@@ -685,8 +685,9 @@ textarea:focus {
   }
 
   .map-stage {
-    height: min(58vh, 430px);
-    min-height: 330px;
+    height: 42vh;
+    min-height: 250px;
+    max-height: 340px;
   }
 
   .tabs {
@@ -719,6 +720,14 @@ textarea:focus {
     padding: 12px;
   }
 
+  .summary-card {
+    padding: 10px;
+  }
+
+  .summary-card strong {
+    font-size: 16px;
+  }
+
   .editor-form {
     grid-template-columns: 1fr;
     gap: 10px;
@@ -733,7 +742,7 @@ textarea:focus {
   input,
   select,
   textarea {
-    min-height: 46px;
+    min-height: 44px;
     font-size: 16px;
   }
 
@@ -747,7 +756,7 @@ textarea:focus {
   .file-btn,
   .icon-btn,
   .mini-btn {
-    min-height: 46px;
+    min-height: 44px;
   }
 
   .form-actions,
@@ -766,11 +775,11 @@ textarea:focus {
   }
 
   .item {
-    padding: 12px;
+    padding: 10px;
   }
 
   .item h4 {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.35;
   }
 
@@ -783,15 +792,41 @@ textarea:focus {
   }
 
   .right-rail {
-    gap: 12px;
+    gap: 10px;
   }
 
   .sidebar {
-    gap: 12px;
+    gap: 8px;
   }
 
   .brand {
     margin-top: 4px;
+  }
+
+  .sidebar .brand {
+    display: none;
+  }
+
+  .sidebar .panel {
+    padding: 12px;
+  }
+
+  .sidebar .panel.compact {
+    gap: 8px;
+  }
+
+  .sync-box {
+    gap: 8px;
+    padding-top: 8px;
+  }
+
+  .right-rail .panel {
+    padding: 12px;
+  }
+
+  .mini-list,
+  .category-bars {
+    gap: 8px;
   }
 }
 
@@ -828,8 +863,9 @@ textarea:focus {
   }
 
   .map-stage {
-    height: 56vh;
-    min-height: 300px;
+    height: 38vh;
+    min-height: 230px;
+    max-height: 300px;
   }
 
   .form-actions,
