@@ -125,6 +125,20 @@ function cloneData(data) {
   return JSON.parse(JSON.stringify(data));
 }
 
+function normalizeState(value) {
+  const base = cloneData(sampleData);
+  const source = value && typeof value === "object" ? value : {};
+  return {
+    ...base,
+    ...source,
+    meta: { ...base.meta, ...(source.meta || {}) },
+    schedules: Array.isArray(source.schedules) ? source.schedules : [],
+    expenses: Array.isArray(source.expenses) ? source.expenses : [],
+    bookings: Array.isArray(source.bookings) ? source.bookings : [],
+    history: Array.isArray(source.history) ? source.history : []
+  };
+}
+
 function loadState() {
   const params = new URLSearchParams(location.search);
   const remoteDb = params.get("db");
@@ -140,25 +154,27 @@ function loadState() {
   if (shared) {
     try {
       const decoded = JSON.parse(decodeURIComponent(atob(shared)));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(decoded));
+      const normalized = normalizeState(decoded);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
       history.replaceState(null, "", location.pathname);
-      return decoded;
+      return normalized;
     } catch {
-      return cloneData(sampleData);
+      return normalizeState(sampleData);
     }
   }
 
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return cloneData(sampleData);
+  if (!saved) return normalizeState(sampleData);
 
   try {
-    return JSON.parse(saved);
+    return normalizeState(JSON.parse(saved));
   } catch {
-    return cloneData(sampleData);
+    return normalizeState(sampleData);
   }
 }
 
 function save(action) {
+  state = normalizeState(state);
   if (action) {
     state.history.unshift({
       id: newId(),
@@ -246,6 +262,7 @@ function syncMetaFromInputs() {
 }
 
 function updateBudgetPreview() {
+  state = normalizeState(state);
   state.meta.budgetTotal = Number($("#budgetTotal").value || 0);
   const spent = state.expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
   $("#budgetLeft").textContent = won(Number(state.meta.budgetTotal || 0) - spent);
@@ -391,6 +408,7 @@ async function pushRemoteState() {
 
 function applyRemoteState(remote, message = "공동 편집 내용 동기화 완료", options = {}) {
   if (!remote || typeof remote !== "object") return false;
+  remote = normalizeState(remote);
   const remoteSerialized = JSON.stringify(remote);
   const remoteUpdatedAt = remote?.meta?.remoteUpdatedAt || "";
   const localUpdatedAt = state.meta.remoteUpdatedAt || "";
@@ -887,6 +905,7 @@ function escapeHtml(value) {
 }
 
 function render() {
+  state = normalizeState(state);
   renderMeta();
   renderSchedules();
   renderExpenses();
