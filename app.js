@@ -242,6 +242,22 @@ function showSaveToast(message = "저장되었습니다.") {
   }, 2200);
 }
 
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.append(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
 function formHasDraft(form) {
   if (form.elements.id?.value.trim()) return true;
   return Array.from(form.elements).some((field) => {
@@ -595,6 +611,7 @@ function renderSchedules() {
           ${item.note ? `<p>${escapeHtml(item.note)}</p>` : ""}
         </div>
         <div class="item-actions">
+          ${item.placeAddress ? `<button class="mini-btn" data-copy-address="${item.id}" title="주소 복사" type="button">복사</button>` : ""}
           <button class="mini-btn" data-edit-schedule="${item.id}" title="수정" type="button">✎</button>
           <button class="mini-btn" data-delete-schedule="${item.id}" title="삭제" type="button">×</button>
         </div>
@@ -1042,10 +1059,24 @@ function bindEvents() {
 
     const editSchedule = target.dataset.editSchedule;
     const deleteSchedule = target.dataset.deleteSchedule;
+    const copyAddress = target.dataset.copyAddress;
     const editExpense = target.dataset.editExpense;
     const deleteExpense = target.dataset.deleteExpense;
     const editBooking = target.dataset.editBooking;
     const deleteBooking = target.dataset.deleteBooking;
+
+    if (copyAddress) {
+      const item = state.schedules.find((schedule) => schedule.id === copyAddress);
+      const address = item?.placeAddress || "";
+      if (!address) return;
+      copyText(address)
+        .then(() => {
+          setSaveStatus("주소를 복사했습니다.");
+          showSaveToast("주소를 복사했습니다.");
+        })
+        .catch(() => setSaveStatus(address));
+      return;
+    }
 
     if (editSchedule) fillForm($("#scheduleForm"), state.schedules.find((item) => item.id === editSchedule));
     if (deleteSchedule) removeItem("schedules", deleteSchedule, "일정");
