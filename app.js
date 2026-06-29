@@ -121,6 +121,10 @@ function newId() {
   return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function cloneData(data) {
+  return JSON.parse(JSON.stringify(data));
+}
+
 function loadState() {
   const params = new URLSearchParams(location.search);
   const remoteDb = params.get("db");
@@ -140,17 +144,17 @@ function loadState() {
       history.replaceState(null, "", location.pathname);
       return decoded;
     } catch {
-      return structuredClone(sampleData);
+      return cloneData(sampleData);
     }
   }
 
   const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) return structuredClone(sampleData);
+  if (!saved) return cloneData(sampleData);
 
   try {
     return JSON.parse(saved);
   } catch {
-    return structuredClone(sampleData);
+    return cloneData(sampleData);
   }
 }
 
