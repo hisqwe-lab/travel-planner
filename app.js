@@ -202,7 +202,11 @@ function showSaveToast(message = "저장되었습니다.") {
 }
 
 function formHasDraft(form) {
-  return Array.from(new FormData(form).entries()).some(([key, value]) => key !== "id" && String(value).trim() !== "");
+  if (form.elements.id?.value.trim()) return true;
+  return Array.from(form.elements).some((field) => {
+    if (!field.name || field.disabled || field.type === "hidden" || field.tagName === "SELECT") return false;
+    return String(field.value).trim() !== "";
+  });
 }
 
 function syncMetaFromInputs() {
