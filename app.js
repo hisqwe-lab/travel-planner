@@ -102,6 +102,7 @@ if (state.meta?.tripName === "2026 세계 여행") {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 let preferredDayFilter = "";
+let saveToastTimer = null;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -188,6 +189,18 @@ function setSaveStatus(message) {
   $("#shareStatus").textContent = message;
 }
 
+function showSaveToast(message = "저장되었습니다.") {
+  const toast = $("#saveToast");
+  $("#saveToastMessage").textContent = message;
+  toast.classList.add("show");
+  toast.setAttribute("aria-hidden", "false");
+  window.clearTimeout(saveToastTimer);
+  saveToastTimer = window.setTimeout(() => {
+    toast.classList.remove("show");
+    toast.setAttribute("aria-hidden", "true");
+  }, 2200);
+}
+
 function formHasDraft(form) {
   return Array.from(new FormData(form).entries()).some(([key, value]) => key !== "id" && String(value).trim() !== "");
 }
@@ -226,6 +239,7 @@ function saveCurrentWork() {
 
   save("전체 저장");
   setSaveStatus("현재까지 수정한 내용을 저장했습니다.");
+  showSaveToast("현재까지 수정한 내용을 저장했습니다.");
   if (scheduleDraft) updateScheduleLocationAfterSave(scheduleDraft);
 }
 
@@ -846,6 +860,8 @@ function bindEvents() {
     $(`#${id}`).addEventListener("change", (event) => {
       state.meta[id] = event.target.type === "number" ? Number(event.target.value || 0) : event.target.value;
       save("여행 정보 수정");
+      setSaveStatus("여행 정보를 저장했습니다.");
+      showSaveToast("여행 정보를 저장했습니다.");
     });
   });
 
@@ -921,7 +937,8 @@ function bindEvents() {
     upsert("schedules", data);
     resetForm(event.currentTarget);
     save("일정 저장");
-    $("#shareStatus").textContent = "일정을 저장했습니다.";
+    setSaveStatus("일정을 저장했습니다.");
+    showSaveToast("일정을 저장했습니다.");
     updateScheduleLocationAfterSave(data);
   });
   $("#expenseForm").addEventListener("submit", (event) => {
@@ -929,12 +946,16 @@ function bindEvents() {
     upsert("expenses", formToObject(event.currentTarget));
     resetForm(event.currentTarget);
     save("비용 저장");
+    setSaveStatus("비용을 저장했습니다.");
+    showSaveToast("비용을 저장했습니다.");
   });
   $("#bookingForm").addEventListener("submit", (event) => {
     event.preventDefault();
     upsert("bookings", formToObject(event.currentTarget));
     resetForm(event.currentTarget);
     save("예약 저장");
+    setSaveStatus("예약을 저장했습니다.");
+    showSaveToast("예약을 저장했습니다.");
   });
 
   $("#clearSchedule").addEventListener("click", () => resetForm($("#scheduleForm")));
