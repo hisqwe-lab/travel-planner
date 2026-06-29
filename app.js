@@ -212,6 +212,10 @@ function formHasDraft(form) {
   });
 }
 
+function formHasRequiredFields(form) {
+  return Array.from(form.querySelectorAll("[required]")).every((field) => String(field.value).trim() !== "");
+}
+
 function syncMetaFromInputs() {
   state.meta.tripName = $("#tripName").value.trim() || state.meta.tripName;
   state.meta.startDate = $("#startDate").value;
@@ -219,13 +223,9 @@ function syncMetaFromInputs() {
   state.meta.budgetTotal = Number($("#budgetTotal").value || 0);
 }
 
-function saveDraftForm(form, collection, label) {
+function saveDraftForm(form, collection) {
   if (!formHasDraft(form)) return null;
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    setSaveStatus(`${label}에 빠진 항목이 있습니다. 표시된 칸을 먼저 채워주세요.`);
-    return false;
-  }
+  if (!formHasRequiredFields(form) || !form.checkValidity()) return "skipped";
 
   const data = formToObject(form);
   if (!data.id) data.id = crypto.randomUUID();
@@ -238,16 +238,18 @@ function saveDraftForm(form, collection, label) {
 function saveCurrentWork() {
   syncMetaFromInputs();
 
-  const scheduleDraft = saveDraftForm($("#scheduleForm"), "schedules", "일정");
-  if (scheduleDraft === false) return;
-
-  if (saveDraftForm($("#expenseForm"), "expenses", "비용") === false) return;
-  if (saveDraftForm($("#bookingForm"), "bookings", "예약") === false) return;
+  const scheduleDraft = saveDraftForm($("#scheduleForm"), "schedules");
+  const expenseDraft = saveDraftForm($("#expenseForm"), "expenses");
+  const bookingDraft = saveDraftForm($("#bookingForm"), "bookings");
+  const skippedCount = [scheduleDraft, expenseDraft, bookingDraft].filter((result) => result === "skipped").length;
 
   save("전체 저장");
-  setSaveStatus("현재까지 수정한 내용을 저장했습니다.");
-  showSaveToast("현재까지 수정한 내용을 저장했습니다.");
-  if (scheduleDraft) updateScheduleLocationAfterSave(scheduleDraft);
+  const message = skippedCount
+    ? "저장했습니다. 작성 중인 미완성 항목은 건너뛰었습니다."
+    : "현재까지 수정한 내용을 저장했습니다.";
+  setSaveStatus(message);
+  showSaveToast(message);
+  if (scheduleDraft && scheduleDraft !== "skipped") updateScheduleLocationAfterSave(scheduleDraft);
 }
 
 async function enrichScheduleLocation(data) {
@@ -866,8 +868,6 @@ function render() {
 }
 
 function bindEvents() {
-  $("#saveAll").addEventListener("click", saveCurrentWork);
-
   ["tripName", "startDate", "endDate", "budgetTotal"].forEach((id) => {
     $(`#${id}`).addEventListener("change", (event) => {
       state.meta[id] = event.target.type === "number" ? Number(event.target.value || 0) : event.target.value;
@@ -977,6 +977,11 @@ function bindEvents() {
   document.addEventListener("click", (event) => {
     const target = event.target.closest("button");
     if (!target) return;
+
+    if (target.id === "saveAll") {
+      saveCurrentWork();
+      return;
+    }
 
     if (target.id === "openGoogleRoute") {
       openGoogleMapsRoute();
