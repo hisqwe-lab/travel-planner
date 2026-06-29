@@ -87,11 +87,11 @@ const sampleData = {
   expenses: [
     { id: "e1", category: "항공권", title: "국제선 왕복", amount: 2600000, payer: "shared", note: "2인 기준", updatedBy: "me", updatedAt: "2026-06-26T06:00:00.000Z" },
     { id: "e2", category: "숙박", title: "파리 4박", amount: 1280000, payer: "partner", note: "조식 포함", updatedBy: "partner", updatedAt: "2026-06-26T06:12:00.000Z" },
-    { id: "e3", category: "답례품", title: "가족 선물 예산", amount: 450000, payer: "me", note: "추가 가능", updatedBy: "me", updatedAt: "2026-06-26T06:14:00.000Z" }
+    { id: "e3", category: "쇼핑/답례품", title: "가족 선물 예산", amount: 450000, payer: "me", note: "추가 가능", updatedBy: "me", updatedAt: "2026-06-26T06:14:00.000Z" }
   ],
   bookings: [
-    { id: "b1", type: "숙박", title: "파리 레프트뱅크 호텔", date: "2026-09-06", code: "PAR-2048", note: "체크인 15:00", updatedBy: "partner", updatedAt: "2026-06-26T06:18:00.000Z" },
-    { id: "b2", type: "투어", title: "바티칸 오전 투어", date: "2026-09-11", code: "ROMA-77", note: "여권 사본 지참", updatedBy: "me", updatedAt: "2026-06-26T06:22:00.000Z" }
+    { id: "b1", type: "예약 완료", title: "파리 레프트뱅크 호텔", date: "2026-09-06", code: "PAR-2048", note: "체크인 15:00", updatedBy: "partner", updatedAt: "2026-06-26T06:18:00.000Z" },
+    { id: "b2", type: "결제 완료", title: "바티칸 오전 투어", date: "2026-09-11", code: "ROMA-77", note: "여권 사본 지참", updatedBy: "me", updatedAt: "2026-06-26T06:22:00.000Z" }
   ],
   history: []
 };
@@ -311,7 +311,11 @@ function initPlaceAutocomplete() {
 function fillForm(form, item) {
   Object.entries(item).forEach(([key, value]) => {
     const field = form.elements[key];
-    if (field) field.value = value ?? "";
+    if (!field) return;
+    if (field.tagName === "SELECT" && value && !Array.from(field.options).some((option) => option.value === value)) {
+      field.add(new Option(value, value));
+    }
+    field.value = value ?? "";
   });
 }
 
