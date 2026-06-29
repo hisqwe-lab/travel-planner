@@ -110,6 +110,17 @@ let saveToastTimer = null;
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
+function on(selector, eventName, handler) {
+  const element = typeof selector === "string" ? $(selector) : selector;
+  if (element) element.addEventListener(eventName, handler);
+  return element;
+}
+
+function newId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function loadState() {
   const params = new URLSearchParams(location.search);
   const remoteDb = params.get("db");
@@ -146,7 +157,7 @@ function loadState() {
 function save(action) {
   if (action) {
     state.history.unshift({
-      id: crypto.randomUUID(),
+      id: newId(),
       action,
       person: state.meta.activePerson,
       at: new Date().toISOString()
@@ -188,13 +199,20 @@ function formToObject(form) {
 }
 
 function setSaveStatus(message) {
-  $("#saveStatus").textContent = message;
-  $("#shareStatus").textContent = message;
+  const saveStatus = $("#saveStatus");
+  const shareStatus = $("#shareStatus");
+  if (saveStatus) saveStatus.textContent = message;
+  if (shareStatus) shareStatus.textContent = message;
 }
 
 function showSaveToast(message = "저장되었습니다.") {
   const toast = $("#saveToast");
-  $("#saveToastMessage").textContent = message;
+  const toastMessage = $("#saveToastMessage");
+  if (!toast || !toastMessage) {
+    setSaveStatus(message);
+    return;
+  }
+  toastMessage.textContent = message;
   toast.classList.add("show");
   toast.setAttribute("aria-hidden", "false");
   window.clearTimeout(saveToastTimer);
@@ -223,12 +241,18 @@ function syncMetaFromInputs() {
   state.meta.budgetTotal = Number($("#budgetTotal").value || 0);
 }
 
+function updateBudgetPreview() {
+  state.meta.budgetTotal = Number($("#budgetTotal").value || 0);
+  const spent = state.expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  $("#budgetLeft").textContent = won(Number(state.meta.budgetTotal || 0) - spent);
+}
+
 function saveDraftForm(form, collection) {
   if (!formHasDraft(form)) return null;
   if (!formHasRequiredFields(form) || !form.checkValidity()) return "skipped";
 
   const data = formToObject(form);
-  if (!data.id) data.id = crypto.randomUUID();
+  if (!data.id) data.id = newId();
   if (collection === "schedules") preferredDayFilter = data.date || "all";
   upsert(collection, data);
   resetForm(form);
@@ -447,7 +471,7 @@ function startSync() {
 }
 
 function createTripCode() {
-  return `trip-${crypto.randomUUID().slice(0, 8)}-${Date.now().toString(36)}`;
+  return `trip-${newId().slice(0, 8)}-${Date.now().toString(36)}`;
 }
 
 function emptyNode() {
@@ -455,7 +479,7 @@ function emptyNode() {
 }
 
 function upsert(collection, data) {
-  const id = data.id || crypto.randomUUID();
+  const id = data.id || newId();
   const existing = state[collection].findIndex((item) => item.id === id);
   const next = touch({ ...data, id });
   if (collection === "schedules") {
@@ -869,7 +893,9 @@ function render() {
 
 function bindEvents() {
   ["tripName", "startDate", "endDate", "budgetTotal"].forEach((id) => {
-    $(`#${id}`).addEventListener("change", (event) => {
+    const field = $(`#${id}`);
+    if (!field) return;
+    field.addEventListener("change", (event) => {
       state.meta[id] = event.target.type === "number" ? Number(event.target.value || 0) : event.target.value;
       save("여행 정보 수정");
       setSaveStatus("여행 정보를 저장했습니다.");
@@ -877,7 +903,9 @@ function bindEvents() {
     });
   });
 
-  $("#saveGoogleKey").addEventListener("click", () => {
+  on("#budgetTotal", "input", updateBudgetPreview);
+
+  on("#saveGoogleKey", "click", () => {
     googleMapState.key = $("#googleMapsKey").value.trim();
     if (googleMapState.key) {
       localStorage.setItem(GOOGLE_KEY_STORAGE, googleMapState.key);
@@ -893,12 +921,12 @@ function bindEvents() {
     renderMap();
   });
 
-  $("#makeTripCode").addEventListener("click", () => {
+  on("#makeTripCode", "click", () => {
     $("#tripCode").value = createTripCode();
     $("#shareStatus").textContent = "새 여행 코드를 만들었습니다.";
   });
 
-  $("#connectSync").addEventListener("click", () => {
+  on("#connectSync", "click", () => {
     syncState.firebaseUrl = $("#firebaseUrl").value.trim();
     syncState.tripCode = $("#tripCode").value.trim();
     syncState.publicAppUrl = $("#publicAppUrl").value.trim();
@@ -927,12 +955,12 @@ function bindEvents() {
     });
   });
 
-  $("#dayFilter").addEventListener("change", () => {
+  on("#dayFilter", "change", () => {
     renderSchedules();
     renderMap();
   });
 
-  $("#scheduleForm input[name='placeQuery']").addEventListener("focus", () => {
+  on("#scheduleForm input[name='placeQuery']", "focus", () => {
     if (!googleMapState.key) return;
     loadGoogleMaps()
       .then(initPlaceAutocomplete)
@@ -941,10 +969,10 @@ function bindEvents() {
       });
   });
 
-  $("#scheduleForm").addEventListener("submit", async (event) => {
+  on("#scheduleForm", "submit", async (event) => {
     event.preventDefault();
     const data = formToObject(event.currentTarget);
-    if (!data.id) data.id = crypto.randomUUID();
+    if (!data.id) data.id = newId();
     preferredDayFilter = data.date || "all";
     upsert("schedules", data);
     resetForm(event.currentTarget);
@@ -953,7 +981,7 @@ function bindEvents() {
     showSaveToast("일정을 저장했습니다.");
     updateScheduleLocationAfterSave(data);
   });
-  $("#expenseForm").addEventListener("submit", (event) => {
+  on("#expenseForm", "submit", (event) => {
     event.preventDefault();
     upsert("expenses", formToObject(event.currentTarget));
     resetForm(event.currentTarget);
@@ -961,7 +989,7 @@ function bindEvents() {
     setSaveStatus("비용을 저장했습니다.");
     showSaveToast("비용을 저장했습니다.");
   });
-  $("#bookingForm").addEventListener("submit", (event) => {
+  on("#bookingForm", "submit", (event) => {
     event.preventDefault();
     upsert("bookings", formToObject(event.currentTarget));
     resetForm(event.currentTarget);
@@ -970,9 +998,9 @@ function bindEvents() {
     showSaveToast("예약을 저장했습니다.");
   });
 
-  $("#clearSchedule").addEventListener("click", () => resetForm($("#scheduleForm")));
-  $("#clearExpense").addEventListener("click", () => resetForm($("#expenseForm")));
-  $("#clearBooking").addEventListener("click", () => resetForm($("#bookingForm")));
+  on("#clearSchedule", "click", () => resetForm($("#scheduleForm")));
+  on("#clearExpense", "click", () => resetForm($("#expenseForm")));
+  on("#clearBooking", "click", () => resetForm($("#bookingForm")));
 
   document.addEventListener("click", (event) => {
     const target = event.target.closest("button");
@@ -1003,7 +1031,7 @@ function bindEvents() {
     if (deleteBooking) removeItem("bookings", deleteBooking, "예약");
   });
 
-  $("#exportJson").addEventListener("click", () => {
+  on("#exportJson", "click", () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -1014,7 +1042,7 @@ function bindEvents() {
     $("#shareStatus").textContent = "백업 파일을 만들었습니다.";
   });
 
-  $("#importJson").addEventListener("change", async (event) => {
+  on("#importJson", "change", async (event) => {
     const file = event.target.files[0];
     if (!file) return;
     try {
@@ -1026,7 +1054,7 @@ function bindEvents() {
     }
   });
 
-  $("#copyShare").addEventListener("click", async () => {
+  on("#copyShare", "click", async () => {
     syncState.publicAppUrl = $("#publicAppUrl").value.trim();
     if (syncState.publicAppUrl) localStorage.setItem(PUBLIC_APP_URL_STORAGE, syncState.publicAppUrl);
     const currentBaseUrl = location.href.split("?")[0];
@@ -1048,11 +1076,11 @@ function bindEvents() {
     }
   });
 
-  $("#fitRoute").addEventListener("click", () => {
+  on("#fitRoute", "click", () => {
     fitMapToRoute(true);
   });
 
-  $("#travelMap").addEventListener("dblclick", () => {
+  on("#travelMap", "dblclick", () => {
     openGoogleMapsRoute();
   });
 }
