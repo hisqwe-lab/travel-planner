@@ -99,6 +99,373 @@ const sampleData = {
   history: []
 };
 
+const italy2027RomeCapriSchedules = [
+  {
+    id: "it2027-0314-01-fco",
+    date: "2027-03-14",
+    time: "15:30",
+    city: "Rome",
+    title: "로마 도착 - 피우미치노 공항",
+    placeQuery: "Leonardo da Vinci-Fiumicino Airport",
+    placeAddress: "Via dell'Aeroporto di Fiumicino, 00054 Fiumicino RM, Italy",
+    lat: 41.8003,
+    lon: 12.2389,
+    note: "입국 심사 후 로마 시내 이동. 공항-테르미니 이동권 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0314-02-termini",
+    date: "2027-03-14",
+    time: "18:00",
+    city: "Rome",
+    title: "숙소 체크인 - 테르미니/몬티 권역",
+    placeQuery: "Roma Termini",
+    placeAddress: "Via Giovanni Giolitti, 40, 00185 Roma RM, Italy",
+    lat: 41.9009,
+    lon: 12.502,
+    note: "짐 정리 후 가볍게 저녁 식사.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0315-01-colosseum",
+    date: "2027-03-15",
+    time: "09:00",
+    city: "Rome",
+    title: "콜로세움",
+    placeQuery: "Colosseum Rome",
+    placeAddress: "Piazza del Colosseo, 1, 00184 Roma RM, Italy",
+    lat: 41.8902,
+    lon: 12.4922,
+    note: "예약 시간보다 20분 일찍 도착.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0315-02-forum",
+    date: "2027-03-15",
+    time: "11:30",
+    city: "Rome",
+    title: "포로 로마노 & 팔라티노 언덕",
+    placeQuery: "Roman Forum",
+    placeAddress: "Via della Salara Vecchia, 5/6, 00186 Roma RM, Italy",
+    lat: 41.8925,
+    lon: 12.4853,
+    note: "콜로세움 통합권 동선으로 이동.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0315-03-trastevere",
+    date: "2027-03-15",
+    time: "18:30",
+    city: "Rome",
+    title: "트라스테베레 저녁 산책",
+    placeQuery: "Piazza di Santa Maria in Trastevere",
+    placeAddress: "Piazza di Santa Maria in Trastevere, 00153 Roma RM, Italy",
+    lat: 41.8894,
+    lon: 12.4697,
+    note: "저녁 식사와 야간 산책.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0316-01-vatican",
+    date: "2027-03-16",
+    time: "09:00",
+    city: "Vatican City",
+    title: "바티칸 박물관 & 시스티나 성당",
+    placeQuery: "Vatican Museums",
+    placeAddress: "Viale Vaticano, 00165 Roma RM, Italy",
+    lat: 41.9065,
+    lon: 12.4536,
+    note: "입장권 사전 예약 필수. 여권명과 예약명 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0316-02-stpeter",
+    date: "2027-03-16",
+    time: "13:30",
+    city: "Vatican City",
+    title: "성 베드로 대성당",
+    placeQuery: "St. Peter's Basilica",
+    placeAddress: "Piazza San Pietro, 00120 Citta del Vaticano, Vatican City",
+    lat: 41.9022,
+    lon: 12.4539,
+    note: "복장 규정 확인. 돔 전망은 체력에 따라 선택.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0316-03-castel",
+    date: "2027-03-16",
+    time: "16:30",
+    city: "Rome",
+    title: "산탄젤로 성 주변 산책",
+    placeQuery: "Castel Sant'Angelo",
+    placeAddress: "Lungotevere Castello, 50, 00193 Roma RM, Italy",
+    lat: 41.9031,
+    lon: 12.4663,
+    note: "테베레 강변 노을 산책.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0317-01-pantheon",
+    date: "2027-03-17",
+    time: "09:30",
+    city: "Rome",
+    title: "판테온",
+    placeQuery: "Pantheon Rome",
+    placeAddress: "Piazza della Rotonda, 00186 Roma RM, Italy",
+    lat: 41.8986,
+    lon: 12.4769,
+    note: "오전 일찍 방문 후 도보 이동.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0317-02-navona",
+    date: "2027-03-17",
+    time: "11:00",
+    city: "Rome",
+    title: "나보나 광장",
+    placeQuery: "Piazza Navona",
+    placeAddress: "Piazza Navona, 00186 Roma RM, Italy",
+    lat: 41.8992,
+    lon: 12.4731,
+    note: "광장 카페 휴식.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0317-03-trevi",
+    date: "2027-03-17",
+    time: "15:30",
+    city: "Rome",
+    title: "트레비 분수 & 스페인 계단",
+    placeQuery: "Trevi Fountain",
+    placeAddress: "Piazza di Trevi, 00187 Roma RM, Italy",
+    lat: 41.9009,
+    lon: 12.4833,
+    note: "트레비 분수에서 스페인 계단까지 도보 이동.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0318-01-borghese",
+    date: "2027-03-18",
+    time: "10:00",
+    city: "Rome",
+    title: "보르게세 미술관",
+    placeQuery: "Galleria Borghese",
+    placeAddress: "Piazzale Scipione Borghese, 5, 00197 Roma RM, Italy",
+    lat: 41.9142,
+    lon: 12.4922,
+    note: "예약제 운영 여부 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0318-02-borghese-park",
+    date: "2027-03-18",
+    time: "13:00",
+    city: "Rome",
+    title: "빌라 보르게세 공원 산책",
+    placeQuery: "Villa Borghese",
+    placeAddress: "00197 Roma RM, Italy",
+    lat: 41.9147,
+    lon: 12.4853,
+    note: "여유 일정. 컨디션에 따라 쇼핑/휴식으로 대체.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0319-01-termini",
+    date: "2027-03-19",
+    time: "08:30",
+    city: "Rome",
+    title: "로마 테르미니역 출발",
+    placeQuery: "Roma Termini",
+    placeAddress: "Via Giovanni Giolitti, 40, 00185 Roma RM, Italy",
+    lat: 41.9009,
+    lon: 12.502,
+    note: "나폴리행 고속열차 탑승. 짐 이동 동선 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0319-02-napoli-centrale",
+    date: "2027-03-19",
+    time: "10:00",
+    city: "Naples",
+    title: "나폴리 중앙역 도착",
+    placeQuery: "Napoli Centrale",
+    placeAddress: "Piazza Giuseppe Garibaldi, 80142 Napoli NA, Italy",
+    lat: 40.8529,
+    lon: 14.272,
+    note: "숙소 또는 짐 보관소 이동.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0319-03-naples-dinner",
+    date: "2027-03-19",
+    time: "18:30",
+    city: "Naples",
+    title: "나폴리 피자 저녁",
+    placeQuery: "L'Antica Pizzeria da Michele Napoli",
+    placeAddress: "Via Cesare Sersale, 1, 80139 Napoli NA, Italy",
+    lat: 40.8499,
+    lon: 14.2633,
+    note: "대기 가능성 있음. 현금/카드 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0320-01-pompeii",
+    date: "2027-03-20",
+    time: "09:30",
+    city: "Pompeii",
+    title: "폼페이 유적",
+    placeQuery: "Pompeii Archaeological Park",
+    placeAddress: "Via Villa dei Misteri, 2, 80045 Pompei NA, Italy",
+    lat: 40.7497,
+    lon: 14.4849,
+    note: "편한 신발 필수. 물과 간식 준비.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0320-02-sorrento",
+    date: "2027-03-20",
+    time: "16:00",
+    city: "Sorrento",
+    title: "소렌토 산책",
+    placeQuery: "Piazza Tasso Sorrento",
+    placeAddress: "Piazza Tasso, 80067 Sorrento NA, Italy",
+    lat: 40.6263,
+    lon: 14.3758,
+    note: "레몬 디저트와 해안 전망.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0321-01-ferry-capri",
+    date: "2027-03-21",
+    time: "09:30",
+    city: "Naples",
+    title: "카프리행 페리 탑승",
+    placeQuery: "Molo Beverello Naples",
+    placeAddress: "Molo Beverello, 80133 Napoli NA, Italy",
+    lat: 40.838,
+    lon: 14.2547,
+    note: "페리 시간표와 기상 상황 전날 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0321-02-marina-grande",
+    date: "2027-03-21",
+    time: "11:00",
+    city: "Capri",
+    title: "카프리 마리나 그란데 도착",
+    placeQuery: "Marina Grande Capri",
+    placeAddress: "Marina Grande, 80076 Capri NA, Italy",
+    lat: 40.556,
+    lon: 14.2429,
+    note: "숙소 이동 또는 짐 보관 후 섬 안쪽 이동.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0321-03-augustus",
+    date: "2027-03-21",
+    time: "15:00",
+    city: "Capri",
+    title: "아우구스투스 정원",
+    placeQuery: "Gardens of Augustus Capri",
+    placeAddress: "Via Matteotti, 2, 80076 Capri NA, Italy",
+    lat: 40.5489,
+    lon: 14.242,
+    note: "파라글리오니 전망 감상.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0322-01-blue-grotto",
+    date: "2027-03-22",
+    time: "09:30",
+    city: "Capri",
+    title: "푸른 동굴 보트 투어",
+    placeQuery: "Blue Grotto Capri",
+    placeAddress: "Grotta Azzurra, 80071 Anacapri NA, Italy",
+    lat: 40.5608,
+    lon: 14.2058,
+    note: "파도와 조수에 따라 입장 불가 가능. 오전 우선 배치.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0322-02-anacapri",
+    date: "2027-03-22",
+    time: "13:00",
+    city: "Anacapri",
+    title: "아나카프리 & 몬테 솔라로",
+    placeQuery: "Monte Solaro Anacapri",
+    placeAddress: "80071 Anacapri NA, Italy",
+    lat: 40.5508,
+    lon: 14.2167,
+    note: "리프트 운행 여부 확인. 전망 일정.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0322-03-marina-piccola",
+    date: "2027-03-22",
+    time: "17:00",
+    city: "Capri",
+    title: "마리나 피콜라 노을",
+    placeQuery: "Marina Piccola Capri",
+    placeAddress: "Marina Piccola, 80076 Capri NA, Italy",
+    lat: 40.547,
+    lon: 14.2386,
+    note: "카프리 마지막 저녁.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0323-01-capri-depart",
+    date: "2027-03-23",
+    time: "09:00",
+    city: "Capri",
+    title: "카프리 출발",
+    placeQuery: "Marina Grande Capri",
+    placeAddress: "Marina Grande, 80076 Capri NA, Italy",
+    lat: 40.556,
+    lon: 14.2429,
+    note: "나폴리 또는 로마 이동. 페리 시간 여유 있게 확인.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  },
+  {
+    id: "it2027-0323-02-rome-depart",
+    date: "2027-03-23",
+    time: "16:30",
+    city: "Rome",
+    title: "로마 출국 준비",
+    placeQuery: "Leonardo da Vinci-Fiumicino Airport",
+    placeAddress: "Via dell'Aeroporto di Fiumicino, 00054 Fiumicino RM, Italy",
+    lat: 41.8003,
+    lon: 12.2389,
+    note: "국제선 기준 공항 도착 시간 여유 확보.",
+    updatedBy: "shared",
+    updatedAt: "2026-06-30T00:00:00.000Z"
+  }
+];
+
 let state = loadState();
 if (state.meta?.tripName === "2026 세계 여행") {
   state.meta.tripName = "이탈리아 신혼여행";
@@ -128,7 +495,7 @@ function cloneData(data) {
 function normalizeState(value) {
   const base = cloneData(sampleData);
   const source = value && typeof value === "object" ? value : {};
-  return {
+  const normalized = {
     ...base,
     ...source,
     meta: { ...base.meta, ...(source.meta || {}) },
@@ -137,6 +504,19 @@ function normalizeState(value) {
     bookings: Array.isArray(source.bookings) ? source.bookings : [],
     history: Array.isArray(source.history) ? source.history : []
   };
+  return addItaly2027RomeCapriData(normalized);
+}
+
+function addItaly2027RomeCapriData(data) {
+  if (data.meta.italy2027RomeCapriAdded) return data;
+  const existingIds = new Set(data.schedules.map((item) => item.id));
+  const additions = italy2027RomeCapriSchedules.filter((item) => !existingIds.has(item.id));
+  data.schedules = [...data.schedules, ...cloneData(additions)];
+  data.meta.tripName = "이탈리아 로마~카프리섬 여행";
+  data.meta.startDate = "2027-03-14";
+  data.meta.endDate = "2027-03-23";
+  data.meta.italy2027RomeCapriAdded = true;
+  return data;
 }
 
 function loadState() {
